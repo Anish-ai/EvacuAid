@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  --color-brand-red: #ef4444; /* red-500 */
+  --color-brand-orange: #f97316; /* orange-500 */
+  --color-brand-green: #22c55e; /* green-500 */
+  --color-brand-dark: #111827; /* gray-900 */
+  --color-brand-darker: #030712; /* gray-950 */
+  --color-brand-panel: #1f2937; /* gray-800 */
+  --color-brand-text: #f9fafb; /* gray-50 */
+  --color-brand-text-muted: #9ca3af; /* gray-400 */
+}
+
+/* Default dark mode theme for control room */
+:root {
+  --background: #030712; /* gray-950 */
+  --foreground: #f9fafb; /* gray-50 */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for control room feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #111827;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FACILITY ROUTING ENGINE — design tokens & utilities
+   All prefixed with --routing- / .routing- to avoid collisions
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --routing-bg-base: #070d1a;
+  --routing-bg-surface: #0d1526;
+  --routing-bg-card: #111c32;
+  --routing-bg-card-hover: #162040;
+  --routing-border: rgba(99,102,241,0.2);
+  --routing-border-hover: rgba(99,102,241,0.45);
+  --routing-primary: #6366F1;
+  --routing-primary-light: #818CF8;
+  --routing-primary-dark: #4F46E5;
+  --routing-accent: #8B5CF6;
+  --routing-success: #10B981;
+  --routing-warning: #F59E0B;
+  --routing-danger: #EF4444;
+  --routing-text-primary: #F1F5F9;
+  --routing-text-secondary: #94A3B8;
+  --routing-text-muted: #475569;
+}
+
+/* Panel sidebar */
+.routing-panel {
+  background: var(--routing-bg-card);
+  border-right: 1px solid var(--routing-border);
+  overflow-y: auto;
+}
+.routing-panel-right {
+  background: var(--routing-bg-card);
+  border-left: 1px solid var(--routing-border);
+  overflow-y: auto;
+}
+
+/* Buttons */
+.routing-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 8px; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.15s ease;
+  border: 1px solid transparent; background: transparent;
+}
+.routing-btn-primary {
+  background: var(--routing-primary); color: #fff; border-color: var(--routing-primary);
+}
+.routing-btn-primary:hover:not(:disabled) { background: var(--routing-primary-dark); box-shadow: 0 0 12px rgba(99,102,241,0.4); }
+.routing-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.routing-btn-secondary {
+  background: transparent; color: var(--routing-text-secondary);
+  border-color: var(--routing-border);
+}
+.routing-btn-secondary:hover { border-color: var(--routing-border-hover); color: var(--routing-text-primary); background: var(--routing-bg-card-hover); }
+.routing-btn-danger { background: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.3); }
+.routing-btn-danger:hover { background: rgba(239,68,68,0.25); }
+.routing-btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* Tool button */
+.routing-tool-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 6px; border-radius: 8px; cursor: pointer;
+  font-size: 10px; color: var(--routing-text-muted);
+  border: 1px solid transparent; transition: all 0.15s;
+  background: transparent; width: 100%;
+}
+.routing-tool-btn:hover { background: var(--routing-bg-card-hover); color: var(--routing-text-secondary); border-color: var(--routing-border); }
+.routing-tool-btn.active { background: rgba(99,102,241,0.2); color: var(--routing-primary-light); border-color: var(--routing-primary); }
+
+/* Input */
+.routing-input {
+  background: var(--routing-bg-surface); border: 1px solid var(--routing-border);
+  border-radius: 7px; padding: 7px 10px; font-size: 13px;
+  color: var(--routing-text-primary); width: 100%; outline: none; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.routing-input:focus { border-color: var(--routing-primary); box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+.routing-input::placeholder { color: var(--routing-text-muted); }
+
+/* Select */
+.routing-select {
+  background: var(--routing-bg-surface); border: 1px solid var(--routing-border);
+  border-radius: 7px; padding: 8px 10px; font-size: 13px;
+  color: var(--routing-text-primary); width: 100%; outline: none;
+  cursor: pointer; font-family: inherit; transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+.routing-select:focus { border-color: var(--routing-primary); }
+
+/* Label */
+.routing-label { font-size: 11px; font-weight: 600; color: var(--routing-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+
+/* Badge */
+.routing-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500;
+}
+.routing-badge-primary { background: rgba(99,102,241,0.2); color: #818CF8; border: 1px solid rgba(99,102,241,0.3); }
+.routing-badge-success { background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid rgba(16,185,129,0.25); }
+.routing-badge-danger { background: rgba(239,68,68,0.15); color: #F87171; border: 1px solid rgba(239,68,68,0.25); }
+.routing-badge-warning { background: rgba(245,158,11,0.15); color: #FCD34D; border: 1px solid rgba(245,158,11,0.25); }
+
+/* Divider */
+.routing-divider { border: none; border-top: 1px solid var(--routing-border); margin: 10px 0; }
+
+/* Animations */
+@keyframes routingFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.routing-animate-fade-in { animation: routingFadeIn 0.2s ease both; }
+
+/* Step item */
+.routing-step-item {
+  display: flex; gap: 10px; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--routing-border); background: var(--routing-bg-surface);
+  transition: all 0.15s; font-size: 13px;
+}
+.routing-step-item:hover { border-color: var(--routing-border-hover); background: var(--routing-bg-card-hover); }
+.routing-step-item.walk { border-left: 3px solid var(--routing-primary); }
+.routing-step-item.floor-change { border-left: 3px solid var(--routing-accent); }
+
+/* Floor tab */
+.routing-floor-tab {
+  padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid transparent; white-space: nowrap;
+  transition: all 0.15s; color: var(--routing-text-muted); background: transparent; width: 100%;
+}
+.routing-floor-tab:hover { color: var(--routing-text-secondary); background: var(--routing-bg-card-hover); }
+.routing-floor-tab.active { background: rgba(99,102,241,0.2); color: var(--routing-primary-light); border-color: var(--routing-primary); }
+
+/* Scenario card */
+.routing-scenario-card {
+  border: 1px solid var(--routing-border); border-radius: 10px; padding: 12px 14px;
+  cursor: pointer; transition: all 0.15s; background: var(--routing-bg-surface);
+}
+.routing-scenario-card:hover { border-color: var(--routing-border-hover); background: var(--routing-bg-card-hover); }
+.routing-scenario-card.active { border-color: var(--routing-primary); background: rgba(99,102,241,0.1); }
