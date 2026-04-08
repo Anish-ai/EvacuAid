@@ -10,7 +10,8 @@ import {
   Bell, 
   BarChart3, 
   Settings,
-  ShieldAlert
+  ShieldAlert,
+  Cpu
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -21,6 +22,7 @@ const navigation = [
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
   { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "IoT Devices", href: "/devices", icon: Cpu },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
