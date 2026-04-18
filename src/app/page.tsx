@@ -1,143 +1,181 @@
 import Link from "next/link"
-import { ShieldAlert, ArrowRight, Activity, BrainCircuit, Users, Lock, ChevronRight, CheckCircle2, ChevronDown, Zap, Server, MapPin } from "lucide-react"
+import { ShieldAlert, ArrowRight, Activity, BrainCircuit, Users, Database, Zap, Server, MapPin, SearchCheck } from "lucide-react"
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-sky-200">
+    <div className="min-h-full bg-slate-950 text-slate-100 font-sans selection:bg-sky-500/30 overflow-x-hidden">
       
+      {/* Background Deep Gradients */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-red-600/10 rounded-full blur-[150px]" />
+      </div>
+
+      {/* Floating Nano-Grid */}
+      <div className="fixed inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-50 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="h-6 w-6 text-red-500" />
-            <span className="text-xl font-bold tracking-widest text-slate-900">EvacuAid</span>
-            <span className="ml-2 text-xs font-semibold bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Solution Challenge '26</span>
+      <nav className="fixed top-0 w-full bg-slate-950/50 backdrop-blur-xl border-b border-white/5 z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-500/20 p-2 rounded-xl border border-red-500/30">
+              <ShieldAlert className="h-6 w-6 text-red-500" />
+            </div>
+            <span className="text-2xl font-black tracking-widest text-white">EvacuAid</span>
+            <span className="ml-4 text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 px-3 py-1 rounded-full uppercase tracking-widest hidden sm:block">
+              Solution Challenge '26
+            </span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="#problem" className="text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">The Problem</Link>
-            <Link href="#architecture" className="text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors">Tech Stack</Link>
-            <Link href="/dashboard" className="text-sm font-semibold bg-slate-900 text-white px-5 py-2 rounded-full hover:bg-sky-600 transition-colors flex items-center gap-2">
+          <div className="flex items-center gap-8">
+            <Link href="#problem" className="text-sm font-medium text-slate-400 hover:text-white transition-colors hidden md:block">The Problem</Link>
+            <Link href="#architecture" className="text-sm font-medium text-slate-400 hover:text-white transition-colors hidden md:block">Tech Stack</Link>
+            <Link href="/dashboard" className="text-sm font-bold bg-white text-slate-950 px-6 py-2.5 rounded-full hover:bg-sky-50 transition-colors flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
               Launch MVP <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10 pt-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 border border-sky-100 text-sky-700 text-xs font-bold uppercase tracking-widest mb-6">
-            <BrainCircuit className="h-4 w-4" /> Powered natively by Google Gemini
+      {/* Extreme Hero Section */}
+      <section className="relative pt-40 pb-32 px-6 flex flex-col items-center justify-center min-h-screen">
+        <div className="max-w-5xl mx-auto text-center relative z-10 flex flex-col items-center">
+          
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 border border-slate-700 text-sky-400 text-xs font-bold uppercase tracking-widest mb-8 shadow-2xl">
+            <span className="relative flex h-2 w-2 mr-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+            </span>
+            System Node Online
           </div>
           
-          <h1 className="text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 drop-shadow-sm">
-            Autonomous <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Crisis Response</span>
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[1.1] drop-shadow-2xl">
+            Autonomous <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-500 animate-gradient-x">
+              Crisis Response
+            </span>
           </h1>
           
-          <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Static emergency maps are lethal when fire blocks the primary exit. EvacuAid leverages ML IoT Sensors, YOLOv8 Vision, and generative AI to instantly recalculate escape vectors and blast instructions to trapped occupants.
+          <p className="text-xl md:text-2xl text-slate-400 mb-12 leading-relaxed max-w-3xl mx-auto font-light">
+            EvacuAid leverages live <strong className="text-white">Cloud SQL</strong> telemetry, generative <strong className="text-white">Gemini AI</strong>, and instant <strong className="text-white">A* Map Pathfinding</strong> to route humans dynamically out of catastrophic structural emergencies.
           </p>
           
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard" className="bg-gradient-to-r from-sky-600 to-blue-600 shadow-lg shadow-sky-200 text-white px-8 py-3.5 rounded-full font-bold text-lg hover:scale-105 hover:shadow-sky-300 transition-all flex items-center gap-2">
-              Command Dashboard Demo <ArrowRight className="h-5 w-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto">
+            <Link href="/dashboard" className="w-full sm:w-auto overflow-hidden relative group bg-gradient-to-r from-sky-600 to-blue-700 px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-all flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(2,132,199,0.4)]">
+              <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+              Enter Command Center <ArrowRight className="h-6 w-6" />
             </Link>
-            <Link href="#architecture" className="bg-white border-2 border-slate-200 text-slate-700 px-8 py-3.5 rounded-full font-bold text-lg hover:border-slate-300 hover:bg-slate-50 transition-all">
+            <Link href="#architecture" className="w-full sm:w-auto bg-slate-900 border-2 border-slate-700 text-slate-300 px-10 py-5 rounded-full font-bold text-lg hover:border-slate-500 hover:text-white transition-all flex items-center justify-center">
               View Architecture
             </Link>
           </div>
         </div>
       </section>
 
-      {/* The Problem & USP */}
-      <section id="problem" className="py-24 bg-white px-6 border-y border-slate-200">
+      {/* The USP Grid */}
+      <section id="problem" className="py-32 bg-slate-950/80 px-6 border-y border-white/5 relative z-10 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Why EvacuAid? (Our USP)</h2>
-            <div className="w-20 h-1 bg-red-400 mx-auto mt-4 rounded-full" />
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white">Why EvacuAid?</h2>
+            <p className="text-slate-400 mt-6 text-lg max-w-2xl mx-auto">Static fire escape signs are deadly if the fire is actively blocking the stairs. Our system forces a dynamic recalculation layer.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 mb-6"><Activity className="h-6 w-6" /></div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">The Problem</h3>
-              <p className="text-slate-600 leading-relaxed">During structural emergencies, standard evacuation maps lead humans blindly into hazardous corridors if the fire originates there. Panic makes coordination impossible.</p>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="bg-slate-900/50 p-10 rounded-3xl border border-slate-800 hover:border-slate-700 transition-all hover:-translate-y-2">
+              <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 mb-8 border border-red-500/20"><Activity className="h-7 w-7" /></div>
+              <h3 className="text-2xl font-bold mb-4 text-white">The Deadly Standard</h3>
+              <p className="text-slate-400 leading-relaxed text-lg">During structural emergencies, standard evacuation maps lead humans blindly into hazardous corridors if the fire originates there. Coordination without live geometry is impossible.</p>
             </div>
             
-            <div className="bg-sky-50 p-8 rounded-2xl border border-sky-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="w-12 h-12 bg-sky-200 rounded-xl flex items-center justify-center text-sky-700 mb-6"><BrainCircuit className="h-6 w-6" /></div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Our Solution (USP)</h3>
-              <p className="text-slate-700 leading-relaxed font-medium">We replaced the static map with a live A* routing engine. If an IoT Sensor detects smoke, the node dies, and the Map recalculates the shortest survivable exit in 3 milliseconds.</p>
+            <div className="bg-sky-900/10 p-10 rounded-3xl border border-sky-500/20 shadow-[0_0_30px_rgba(14,165,233,0.05)] hover:border-sky-500/40 transition-all hover:-translate-y-2 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 blur-[80px] group-hover:bg-sky-500/40 transition-all" />
+              <div className="w-14 h-14 bg-sky-500/20 rounded-2xl flex items-center justify-center text-sky-400 mb-8 border border-sky-500/30"><MapPin className="h-7 w-7" /></div>
+              <h3 className="text-2xl font-bold mb-4 text-white">Dynamic Map Routing (A*)</h3>
+              <p className="text-slate-400 leading-relaxed text-lg">We replaced the static map with a live <strong className="text-white">A* routing engine</strong>. If an IoT Sensor detects smoke, the node dies, and the Map recalculates the shortest survivable exit in pure milliseconds.</p>
             </div>
             
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 mb-6"><Users className="h-6 w-6" /></div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900">Autonomous Dispatch</h3>
-              <p className="text-slate-600 leading-relaxed">No human intervention required. IsolationForest ML detects anomalies, flags the severity, and autogenerates a payload to automatically dispatch emergency responders.</p>
+            <div className="bg-slate-900/50 p-10 rounded-3xl border border-slate-800 hover:border-slate-700 transition-all hover:-translate-y-2">
+              <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 mb-8 border border-emerald-500/20"><SearchCheck className="h-7 w-7" /></div>
+              <h3 className="text-2xl font-bold mb-4 text-white">Global Real-time Search</h3>
+              <p className="text-slate-400 leading-relaxed text-lg">Equipped with a unified Omnibox command palette. Search instantly scales across active incidents, offline CCTVs, and actual topological map coordinates.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Tech Stack & Architecture mapping */}
-      <section id="architecture" className="py-24 px-6 bg-slate-900 text-white">
+      {/* Massive Architecture Breakdown */}
+      <section id="architecture" className="py-32 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-16 items-center">
+          
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-6">Built For Scale. Built For GCP.</h2>
+            <p className="text-slate-400 text-xl max-w-3xl mx-auto">We ripped out local states and fully integrated a deep-stack Next.js architecture running natively off Google services.</p>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
             
-            <div className="flex-1 space-y-8">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight text-white mb-4">Architecture & Tech Stack</h2>
-                <p className="text-slate-400 text-lg leading-relaxed">The EvacuAid prototype is completely functional. It uses a decoupled modern architecture bridging a high-performance React UI with a deep-learning Python backend.</p>
+            {/* The Stack List */}
+            <div className="flex-1 space-y-6 w-full">
+              <div className="flex items-start gap-6 bg-slate-900/40 p-6 opacity-90 rounded-2xl border border-slate-800 hover:border-blue-500/30 transition-colors">
+                <div className="p-4 bg-blue-500/10 text-blue-400 rounded-xl shrink-0"><Database className="h-6 w-6" /></div>
+                <div>
+                  <h4 className="text-xl font-bold text-white mb-2">Google Cloud SQL Engine</h4>
+                  <p className="text-slate-400 leading-relaxed">Centralized single source of truth securely hosting the live graph topologies, hardware sensor arrays, and active crisis assignments via Prisma ORM.</p>
+                </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                  <div className="p-3 bg-blue-500/20 text-blue-400 rounded-lg"><Zap className="h-6 w-6" /></div>
-                  <div>
-                    <h4 className="font-bold text-white">Frontend: Next.js + Zustand + Canvas</h4>
-                    <p className="text-sm text-slate-400">High-FPS Graph mapping via HTML5 Canvas API.</p>
-                  </div>
+              <div className="flex items-start gap-6 bg-sky-900/20 p-6 rounded-2xl border border-sky-500/30 shadow-[0_0_30px_rgba(14,165,233,0.1)]">
+                <div className="p-4 bg-sky-500/20 text-sky-400 rounded-xl shrink-0"><BrainCircuit className="h-6 w-6" /></div>
+                <div>
+                  <h4 className="text-xl font-bold text-sky-100 mb-2">Gemini 2.5 Flash API</h4>
+                  <p className="text-slate-300 leading-relaxed">The Chat Widget queries the backend, which parses the Cloud SQL telemetry directly into the LLM context. Gemini reads live emergencies perfectly.</p>
                 </div>
-                
-                <div className="flex items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                  <div className="p-3 bg-green-500/20 text-green-400 rounded-lg"><Server className="h-6 w-6" /></div>
-                  <div>
-                    <h4 className="font-bold text-white">Backend: Python FastAPI + Scikit</h4>
-                    <p className="text-sm text-slate-400">YOLOv8 vision models & IsolationForest time-series anomaly detection.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4 bg-sky-900/30 p-4 rounded-xl border border-sky-500/30">
-                  <div className="p-3 bg-sky-500/20 text-sky-400 rounded-lg"><BrainCircuit className="h-6 w-6" /></div>
-                  <div>
-                    <h4 className="font-bold text-sky-100">Google Gemini Pro (Cloud + GenAI)</h4>
-                    <p className="text-sm text-sky-200">The application natively taps into Gemini RAG flows to act as the autonomous dispatch and conversational safety agent.</p>
-                  </div>
+              </div>
+
+              <div className="flex items-start gap-6 bg-slate-900/40 p-6 opacity-90 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-colors">
+                <div className="p-4 bg-emerald-500/10 text-emerald-400 rounded-xl shrink-0"><Zap className="h-6 w-6" /></div>
+                <div>
+                  <h4 className="text-xl font-bold text-white mb-2">High FPS Dashboard (Vercel)</h4>
+                  <p className="text-slate-400 leading-relaxed">Next.js 16 app directory, aggressive Zustand local cache hydration, and interactive HTML5 map canvases delivered globally.</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 w-full bg-slate-800 rounded-2xl border border-slate-700 p-8 shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500 opacity-10 blur-3xl" />
-               <div className="space-y-6 relative z-10 font-mono text-sm">
-                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between border border-slate-700">
-                    <span className="text-emerald-400">1. IoT Sensor (Temp/Smoke)</span>
-                    <span className="text-slate-500">→</span>
+            {/* Visual Architecture Diagram Box */}
+            <div className="flex-1 w-full bg-slate-900 rounded-[2.5rem] border border-slate-800 p-1 lg:p-2 shadow-2xl relative">
+              <div className="bg-slate-950 rounded-[2rem] p-8 lg:p-12 w-full h-full relative overflow-hidden">
+                <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[80px]" />
+                
+                <h3 className="text-lg font-bold text-slate-300 mb-8 tracking-widest uppercase flex items-center gap-3">
+                  <Server className="h-5 w-5" /> Data Flow Pipeline
+                </h3>
+
+                <div className="space-y-6 relative z-10 font-mono text-sm tracking-wide">
+                  <div className="bg-slate-900 p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between border border-slate-800 gap-4">
+                    <span className="text-slate-300 font-bold bg-slate-800 px-3 py-1 rounded-md">Frontend UI</span>
+                    <span className="text-slate-500 hidden md:block">← fetch() →</span>
+                    <span className="text-sky-400">/api/chat Route</span>
                   </div>
-                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between border-l-4 border-l-sky-500 shadow-lg shadow-sky-500/10">
-                    <span className="text-sky-400">2. Python Engine (Isolation Forest ML)</span>
-                    <span className="text-slate-500">→</span>
+                  
+                  <div className="flex justify-center text-slate-700 py-1">↓</div>
+                  
+                  <div className="bg-blue-900/20 p-5 rounded-2xl border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col">
+                    <span className="text-blue-300 font-bold mb-3">Google Cloud SQL</span>
+                    <div className="text-slate-500 text-xs grid grid-cols-2 gap-2">
+                      <div className="bg-slate-900/80 px-3 py-2 rounded-lg">BuildingMap{}</div>
+                      <div className="bg-slate-900/80 px-3 py-2 rounded-lg">Incidents{}</div>
+                      <div className="bg-slate-900/80 px-3 py-2 rounded-lg">Devices{}</div>
+                    </div>
                   </div>
-                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between border border-slate-700">
-                    <span className="text-amber-400">3. A* Map Engine Recalculates Route</span>
-                    <span className="text-slate-500">→</span>
+                  
+                  <div className="flex justify-center text-slate-700 py-1">↓</div>
+                  
+                  <div className="bg-slate-900 p-5 rounded-2xl flex items-center justify-between border-l-4 border-l-purple-500 border-t border-r border-b border-slate-800">
+                    <span className="text-purple-400 font-bold">Google Generative AI</span>
+                    <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">Gemini 2.5 Flash</span>
                   </div>
-                  <div className="bg-slate-900 p-4 rounded-lg flex items-center justify-between border-l-4 border-l-purple-500">
-                    <span className="text-purple-400">4. Google Gemini NLP Alerts Responder</span>
-                  </div>
-               </div>
+                </div>
+
+              </div>
             </div>
 
           </div>
@@ -145,9 +183,12 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 bg-white border-t border-slate-200 text-center">
-        <p className="text-slate-500 font-medium tracking-wide">EvacuAid © 2026</p>
-        <p className="text-slate-400 text-sm mt-2">Built for the Google Solution Challenge</p>
+      <footer className="py-12 bg-slate-950 border-t border-white/5 text-center relative z-10">
+        <div className="inline-flex items-center gap-2 mb-6 opacity-50 justify-center">
+          <ShieldAlert className="h-5 w-5" />
+          <span className="text-xl font-bold tracking-widest text-white">EvacuAid</span>
+        </div>
+        <p className="text-slate-500 font-medium tracking-wide">© 2026 Emergency Systems</p>
       </footer>
 
     </div>
