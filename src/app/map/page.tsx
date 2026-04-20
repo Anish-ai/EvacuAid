@@ -84,6 +84,7 @@ function MapIncidentBridge() {
 
 export default function MapPage() {
   const [activeTab, setActiveTab] = useState<Tab>("navigate");
+  const [editorRightOpen, setEditorRightOpen] = useState<"tools" | "node" | null>("tools");
 
   // Live emergency sidebar data
   const { emergencyByNodeId } = useRoutingNavigationStore();
@@ -124,43 +125,49 @@ export default function MapPage() {
         {activeTab === "editor" ? <RoutingFloorCanvas /> : <RoutingMapViewer />}
       </div>
 
-      {/* Top Left: Exit Button */}
-      <div className="absolute top-4 left-4 z-[75]">
-        <Link
-          href="/dashboard"
-          className="px-4 py-2 bg-slate-900 text-white rounded-lg font-medium text-sm shadow-xl hover:bg-slate-800 transition-colors inline-block w-max"
-        >
-          ← Exit Map to Dashboard
-        </Link>
-      </div>
+      {/* Top Row: Exit + Mode Toggle (no overlap) */}
+      <div className="absolute top-1 left-1 right-1 z-[75] flex items-start gap-2 pointer-events-none">
+        {/* Left column */}
+        <div className="flex-1 flex justify-start pointer-events-auto">
+          <Link
+            href="/dashboard"
+            className="px-4 py-2 bg-slate-900 text-white rounded-lg font-medium text-sm shadow-xl hover:bg-slate-800 transition-colors inline-block w-max"
+          >
+            ← Exit Map to Dashboard
+          </Link>
+        </div>
 
-      {/* Top Center: Mode Toggle & Badges */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[75] flex flex-col items-center gap-2">
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-xl p-2 flex flex-col sm:flex-row items-center gap-3">
-          <div className="flex gap-1">
-            <button
-              onClick={() => setActiveTab("editor")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${activeTab === "editor" ? "bg-sky-100 text-sky-700 border-sky-300" : "bg-transparent text-slate-500 border-transparent hover:bg-slate-100"}`}
-            >
-              ✏️ Map Editor
-            </button>
-            <button
-              onClick={() => setActiveTab("navigate")}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${activeTab === "navigate" ? "bg-sky-100 text-sky-700 border-sky-300" : "bg-transparent text-slate-500 border-transparent hover:bg-slate-100"}`}
-            >
-              🧭 Navigate & Route
-            </button>
-          </div>
+        {/* Center column (kept centered via left/right flex-1 columns) */}
+        <div className="flex-[0_1_auto] min-w-0 max-w-full pointer-events-auto flex justify-center">
+          <div className="max-w-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-xl p-2 flex flex-wrap sm:flex-nowrap items-center justify-center gap-3">
+            <div className="flex gap-1">
+              <button
+                onClick={() => setActiveTab("editor")}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${activeTab === "editor" ? "bg-sky-100 text-sky-700 border-sky-300" : "bg-transparent text-slate-500 border-transparent hover:bg-slate-100"}`}
+              >
+                ✏️ Map Editor
+              </button>
+              <button
+                onClick={() => setActiveTab("navigate")}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${activeTab === "navigate" ? "bg-sky-100 text-sky-700 border-sky-300" : "bg-transparent text-slate-500 border-transparent hover:bg-slate-100"}`}
+              >
+                🧭 Navigate & Route
+              </button>
+            </div>
 
-          <div className="flex gap-2 border-l border-slate-200 pl-3">
-            <span className="px-3 py-1.5 bg-red-100 text-red-700 rounded-md text-xs font-bold border border-red-200">
-              🔥 {criticalCount()} Critical
-            </span>
-            <span className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-md text-xs font-bold">
-              🚨 {activeCount()} Active
-            </span>
+            <div className="flex gap-2 sm:border-l border-slate-200 sm:pl-3">
+              <span className="px-3 py-1.5 bg-red-100 text-red-700 rounded-md text-xs font-bold border border-red-200">
+                🔥 {criticalCount()} Critical
+              </span>
+              <span className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-md text-xs font-bold">
+                🚨 {activeCount()} Active
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Right column spacer (balances the left column so center stays centered) */}
+        <div className="flex-1" aria-hidden="true" />
       </div>
 
       {/* Main Feature Panels via FloatingPanel wrappers */}
@@ -171,31 +178,47 @@ export default function MapPage() {
             position="bottom-left"
             icon="🏢"
             defaultMinimized={false}
+            className="bottom-3 left-2"
           >
             <RoutingFloorManager />
           </FloatingPanel>
-          <FloatingPanel
-            title="Map Drawing Tools"
-            position="top-right"
-            icon="🛠️"
-            width={180}
-            contentMaxHeight="42vh"
-          >
-            <RoutingToolbar />
-          </FloatingPanel>
-          <FloatingPanel
-            title="Node Properties"
-            position="top-right"
-            icon="⚙️"
-            width={260}
-            defaultMinimized={true}
-            containerStyle={{ right: 16 + 180 + 12 }}
-          >
-            <RoutingNodePanel />
-            <div className="mt-4">
-              <RoutingEdgePanel />
-            </div>
-          </FloatingPanel>
+
+          {/* Top Right: Stack panels; only one open at a time */}
+          <div className="absolute top-1 right-1 z-[75] flex flex-col gap-3 items-end pointer-events-none">
+            <FloatingPanel
+              title="Node Properties"
+              icon="⚙️"
+              width={260}
+              absolute={false}
+              minimized={editorRightOpen !== "node"}
+              onMinimizedChange={(m) => {
+                if (!m) setEditorRightOpen("node");
+                else if (editorRightOpen === "node") setEditorRightOpen(null);
+              }}
+              className="pointer-events-auto"
+            >
+              <RoutingNodePanel />
+              <div className="mt-4">
+                <RoutingEdgePanel />
+              </div>
+            </FloatingPanel>
+
+            <FloatingPanel
+              title="Map Drawing Tools"
+              icon="🛠️"
+              width={180}
+              contentMaxHeight="42vh"
+              absolute={false}
+              minimized={editorRightOpen !== "tools"}
+              onMinimizedChange={(m) => {
+                if (!m) setEditorRightOpen("tools");
+                else if (editorRightOpen === "tools") setEditorRightOpen(null);
+              }}
+              className="pointer-events-auto"
+            >
+              <RoutingToolbar />
+            </FloatingPanel>
+          </div>
         </>
       )}
 
@@ -214,6 +237,7 @@ export default function MapPage() {
             position="top-right"
             icon="🗺️"
             width={320}
+            className="top-1 right-1"
           >
             <RoutingStepList />
           </FloatingPanel>

@@ -19,11 +19,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   // Dashboard Application Layout
   return (
-    <div className="flex h-screen w-full bg-white antialiased">
+    <div className="flex h-screen w-full bg-background antialiased">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-6 selection:bg-sky-200">
+        <main className="flex-1 overflow-y-auto bg-background p-6 selection:bg-sky-200">
           {children}
         </main>
       </div>

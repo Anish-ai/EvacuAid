@@ -15,6 +15,7 @@ import {
 const ZOOM_STEP = 0.05;
 const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 3.0;
+const DEFAULT_ZOOM = 0.95;
 
 function getDefaultLabel(type: NodeType, count: number): string {
   const map: Record<NodeType, string> = {
@@ -42,8 +43,17 @@ export default function RoutingFloorCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   const animOffset = useRef<number>(0);
-  const [zoomLevel, setZoomLevel] = useState(1.2);
+  const canvasBgRef = useRef<string>("#f0f9ff");
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
   const [floorsOpen, setFloorsOpen] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue("--routing-bg-base")
+      .trim();
+    if (v) canvasBgRef.current = v;
+  }, []);
 
   const stateRef = useRef({
     isDragging: false,
@@ -62,8 +72,33 @@ export default function RoutingFloorCanvas() {
     mouseY: 0,
     hoverNodeId: null as string | null,
     hoverEdgeId: null as string | null,
-    zoom: 1.2,
+    zoom: DEFAULT_ZOOM,
   });
+
+  const centeredForFloorRef = useRef<number | null>(null);
+
+  const zoomAt = useCallback(
+    (nextZoom: number, focalX: number, focalY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const s = stateRef.current;
+      const prevZoom = s.zoom;
+
+      const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, nextZoom));
+      if (clamped === prevZoom) return;
+
+      // Keep the map point under the focal screen point stable:
+      // screen = pan + map * zoom  =>  map = (screen - pan) / zoom
+      const mapX = (focalX - s.panOffsetX) / prevZoom;
+      const mapY = (focalY - s.panOffsetY) / prevZoom;
+      s.panOffsetX = focalX - mapX * clamped;
+      s.panOffsetY = focalY - mapY * clamped;
+
+      s.zoom = clamped;
+      setZoomLevel(clamped);
+    },
+    [],
+  );
 
   const store = useRoutingEditorStore();
   const {
@@ -87,31 +122,55 @@ export default function RoutingFloorCanvas() {
 
   const activeFloor = building.floors.find((f) => f.id === activeFloorId);
 
+  // Center view (once per active floor) so default isn't pinned top-left.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !activeFloor) return;
+    if (canvasSize.w <= 0 || canvasSize.h <= 0) return;
+    if (centeredForFloorRef.current === activeFloor.id) return;
+    if (activeFloor.nodes.length === 0) return;
+
+    const xs = activeFloor.nodes.map((n) => n.x);
+    const ys = activeFloor.nodes.map((n) => n.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const s = stateRef.current;
+    s.zoom = DEFAULT_ZOOM;
+    setZoomLevel(DEFAULT_ZOOM);
+
+    const screenCx = canvasSize.w / 2;
+    const screenCy = canvasSize.h / 2;
+    s.panOffsetX = screenCx - cx * s.zoom;
+    s.panOffsetY = screenCy - cy * s.zoom;
+
+    centeredForFloorRef.current = activeFloor.id;
+  }, [activeFloor, canvasSize.h, canvasSize.w]);
+
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
-    const s = stateRef.current;
-    const next = Math.min(
-      ZOOM_MAX,
-      parseFloat((s.zoom + ZOOM_STEP).toFixed(2)),
-    );
-    s.zoom = next;
-    setZoomLevel(next);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const next = parseFloat((stateRef.current.zoom + ZOOM_STEP).toFixed(2));
+    zoomAt(next, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const handleZoomOut = useCallback(() => {
-    const s = stateRef.current;
-    const next = Math.max(
-      ZOOM_MIN,
-      parseFloat((s.zoom - ZOOM_STEP).toFixed(2)),
-    );
-    s.zoom = next;
-    setZoomLevel(next);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const next = parseFloat((stateRef.current.zoom - ZOOM_STEP).toFixed(2));
+    zoomAt(next, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const handleZoomReset = useCallback(() => {
-    stateRef.current.zoom = 1.2;
-    setZoomLevel(1.2);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    zoomAt(DEFAULT_ZOOM, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const snap = useCallback(
     (x: number, y: number) => {
@@ -177,7 +236,7 @@ export default function RoutingFloorCanvas() {
       h = canvas.height;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#f8fafc";
+    ctx.fillStyle = canvasBgRef.current;
     ctx.fillRect(0, 0, w, h);
 
     drawGrid(ctx, w, h, panOffsetX, panOffsetY);
@@ -279,6 +338,7 @@ export default function RoutingFloorCanvas() {
       for (const e of entries) {
         canvas.width = e.contentRect.width;
         canvas.height = e.contentRect.height;
+        setCanvasSize({ w: e.contentRect.width, h: e.contentRect.height });
       }
     });
     obs.observe(container);
@@ -501,15 +561,8 @@ export default function RoutingFloorCanvas() {
         onWheel={(e) => {
           e.preventDefault();
           const dz = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-          const next = Math.max(
-            ZOOM_MIN,
-            Math.min(
-              ZOOM_MAX,
-              parseFloat((stateRef.current.zoom + dz).toFixed(2)),
-            ),
-          );
-          stateRef.current.zoom = next;
-          setZoomLevel(next);
+          const next = parseFloat((stateRef.current.zoom + dz).toFixed(2));
+          zoomAt(next, e.nativeEvent.offsetX, e.nativeEvent.offsetY);
         }}
       />
 
@@ -517,8 +570,8 @@ export default function RoutingFloorCanvas() {
       <div
         style={{
           position: "absolute",
-          bottom: 32,
-          right: 24,
+          bottom: 16,
+          right: 16,
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-end",
@@ -627,8 +680,13 @@ export default function RoutingFloorCanvas() {
               step={ZOOM_STEP}
               value={zoomLevel}
               onChange={(e) => {
-                stateRef.current.zoom = parseFloat(e.target.value);
-                setZoomLevel(stateRef.current.zoom);
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                zoomAt(
+                  parseFloat(e.target.value),
+                  canvas.width / 2,
+                  canvas.height / 2,
+                );
               }}
               style={{
                 width: "120px",

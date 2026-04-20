@@ -75,6 +75,42 @@ export function drawEdge(
   ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke()
   ctx.setLineDash([])
 
+  // Direction arrow for highlighted traversal
+  if (pathHighlight && !edge.blocked) {
+    const dx = tx - fx
+    const dy = ty - fy
+    const len = Math.sqrt(dx * dx + dy * dy)
+    if (len > 40) {
+      const cycle = 20
+      const rawPhase = ((animOffset % cycle) + cycle) % cycle
+      const phase = rawPhase / cycle
+      const t = reverseAnim ? 1 - phase : phase
+
+      // Movement direction follows traversal direction, not stored edge direction
+      const dirX = reverseAnim ? -dx : dx
+      const dirY = reverseAnim ? -dy : dy
+      const angle = Math.atan2(dirY, dirX)
+
+      const ax = fx + dx * t
+      const ay = fy + dy * t
+
+      ctx.save()
+      ctx.translate(ax, ay)
+      ctx.rotate(angle)
+      ctx.fillStyle = 'rgba(2,132,199,0.95)'
+      ctx.shadowColor = 'rgba(14,165,233,0.65)'
+      ctx.shadowBlur = 10
+      ctx.beginPath()
+      // Triangle arrow head pointing to +X
+      ctx.moveTo(8, 0)
+      ctx.lineTo(-4, -4)
+      ctx.lineTo(-4, 4)
+      ctx.closePath()
+      ctx.fill()
+      ctx.restore()
+    }
+  }
+
   // Weight label
   if (!pathHighlight) {
     ctx.font = 'bold 12px Inter, sans-serif'

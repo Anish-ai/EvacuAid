@@ -8,6 +8,9 @@ export interface FloatingPanelProps {
   icon?: React.ReactNode;
   position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   defaultMinimized?: boolean;
+  minimized?: boolean;
+  onMinimizedChange?: (minimized: boolean) => void;
+  absolute?: boolean;
   className?: string;
   width?: string | number;
   contentMaxHeight?: string | number;
@@ -21,13 +24,23 @@ export function FloatingPanel({
   icon,
   position = "top-left",
   defaultMinimized = false,
+  minimized: minimizedProp,
+  onMinimizedChange,
+  absolute = true,
   className = "",
   width = 320,
   contentMaxHeight = "70vh",
   containerStyle,
   onClose,
 }: FloatingPanelProps) {
-  const [minimized, setMinimized] = useState(defaultMinimized);
+  const [uncontrolledMinimized, setUncontrolledMinimized] = useState(defaultMinimized);
+  const isControlled = typeof minimizedProp === "boolean";
+  const minimized = isControlled ? minimizedProp : uncontrolledMinimized;
+
+  const setMinimized = (next: boolean) => {
+    if (!isControlled) setUncontrolledMinimized(next);
+    onMinimizedChange?.(next);
+  };
 
   // Mapping position to absolute CSS classes
   const posClasses = {
@@ -39,7 +52,7 @@ export function FloatingPanel({
 
   return (
     <div
-      className={`absolute z-70 flex flex-col overflow-hidden bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-xl transition-all duration-300 ease-in-out ${posClasses} ${className}`}
+      className={`${absolute ? "absolute" : "relative"} z-70 flex flex-col overflow-hidden bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-xl transition-all duration-300 ease-in-out ${absolute ? posClasses : ""} ${className}`}
       style={{ width, ...containerStyle }}
     >
       {/* Header / Drag Handle */}

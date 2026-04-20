@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import { useRoutingEditorStore } from "@/stores/routingEditorStore";
 import { useRoutingNavigationStore } from "@/stores/routingNavigationStore";
 import {
@@ -12,64 +12,126 @@ import {
 const ZOOM_STEP = 0.05;
 const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 3.0;
+const DEFAULT_ZOOM = 0.7;
 
 export default function RoutingMapViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   const animOffset = useRef<number>(0);
+  const canvasBgRef = useRef<string>("#f0f9ff");
   // Start slightly panned right and at ~75% zoom
   const panRef = useRef({ ox: 120, oy: 60 });
-  const zoomRef = useRef(0.75);
-  const [zoomLevel, setZoomLevel] = useState(0.75);
+  const zoomRef = useRef(DEFAULT_ZOOM);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM);
   const [floorsOpen, setFloorsOpen] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
+
+  const centeredForFloorRef = useRef<number | null>(null);
+
+  const zoomAt = useCallback(
+    (nextZoom: number, focalX: number, focalY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const prevZoom = zoomRef.current;
+      const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, nextZoom));
+      if (clamped === prevZoom) return;
+
+      const { ox, oy } = panRef.current;
+      const mapX = (focalX - ox) / prevZoom;
+      const mapY = (focalY - oy) / prevZoom;
+      panRef.current = {
+        ox: focalX - mapX * clamped,
+        oy: focalY - mapY * clamped,
+      };
+
+      zoomRef.current = clamped;
+      setZoomLevel(clamped);
+    },
+    [],
+  );
 
   const { building } = useRoutingEditorStore();
   const { path, activeViewFloor, setActiveViewFloor, emergencyByNodeId } =
     useRoutingNavigationStore();
 
+  useEffect(() => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue("--routing-bg-base")
+      .trim();
+    if (v) canvasBgRef.current = v;
+  }, []);
+
   const activeFloor = building.floors.find((f) => f.id === activeViewFloor);
 
-  const pathNodeSet = new Set(path?.nodeIds ?? []);
-  const pathEdgeDir = new Map<string, boolean>();
+  // Center view (once per active floor) so default isn't pinned top-left.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !activeFloor) return;
+    if (canvasSize.w <= 0 || canvasSize.h <= 0) return;
+    if (centeredForFloorRef.current === activeFloor.id) return;
+    if (activeFloor.nodes.length === 0) return;
 
-  // Build path edge set and directionality
-  if (path && activeFloor) {
-    const nm = new Map(activeFloor.nodes.map((n) => [n.id, n]));
+    const xs = activeFloor.nodes.map((n) => n.x);
+    const ys = activeFloor.nodes.map((n) => n.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    zoomRef.current = DEFAULT_ZOOM;
+    setZoomLevel(DEFAULT_ZOOM);
+    panRef.current = {
+      ox: canvasSize.w / 2 - cx * DEFAULT_ZOOM,
+      oy: canvasSize.h / 2 - cy * DEFAULT_ZOOM,
+    };
+
+    centeredForFloorRef.current = activeFloor.id;
+  }, [activeFloor, canvasSize.h, canvasSize.w]);
+
+  const hazardTypes = useMemo(() => new Set(["fire", "smoke", "hazmat"]), []);
+
+  const pathNodeSet = useMemo(() => new Set(path?.nodeIds ?? []), [path?.nodeIds]);
+
+  const pathEdgeDir = useMemo(() => {
+    const dir = new Map<string, boolean>();
+    if (!path || !activeFloor) return dir;
+
     const ids = path.nodeIds;
     for (let i = 0; i < ids.length - 1; i++) {
       const u = ids[i];
       const v = ids[i + 1];
-      activeFloor.edges.forEach((e) => {
-        if (e.from === u && e.to === v) pathEdgeDir.set(e.id, false);
-        else if (e.from === v && e.to === u) pathEdgeDir.set(e.id, true);
-      });
+      for (const e of activeFloor.edges) {
+        if (e.from === u && e.to === v) dir.set(e.id, false);
+        else if (e.from === v && e.to === u) dir.set(e.id, true);
+      }
     }
-  }
+
+    return dir;
+  }, [activeFloor, path]);
 
   // Zoom handlers
   const handleZoomIn = useCallback(() => {
-    const next = Math.min(
-      ZOOM_MAX,
-      parseFloat((zoomRef.current + ZOOM_STEP).toFixed(2)),
-    );
-    zoomRef.current = next;
-    setZoomLevel(next);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const next = parseFloat((zoomRef.current + ZOOM_STEP).toFixed(2));
+    zoomAt(next, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const handleZoomOut = useCallback(() => {
-    const next = Math.max(
-      ZOOM_MIN,
-      parseFloat((zoomRef.current - ZOOM_STEP).toFixed(2)),
-    );
-    zoomRef.current = next;
-    setZoomLevel(next);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const next = parseFloat((zoomRef.current - ZOOM_STEP).toFixed(2));
+    zoomAt(next, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const handleZoomReset = useCallback(() => {
-    zoomRef.current = 0.75;
-    setZoomLevel(0.75);
-  }, []);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    zoomAt(DEFAULT_ZOOM, canvas.width / 2, canvas.height / 2);
+  }, [zoomAt]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -82,7 +144,7 @@ export default function RoutingMapViewer() {
       h = canvas.height;
 
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = canvasBgRef.current;
     ctx.fillRect(0, 0, w, h);
     drawGrid(ctx, w, h, ox, oy);
 
@@ -95,6 +157,41 @@ export default function RoutingMapViewer() {
     const nm = new Map(activeFloor.nodes.map((n) => [n.id, n]));
     const anim = animOffset.current;
     const hasPath = path !== null;
+
+    // Neighbor warnings: nodes adjacent to a hazard node (fire/smoke/hazmat)
+    const hazardNodeIds = new Set(
+      Object.entries(emergencyByNodeId)
+        .filter(([, t]) => hazardTypes.has(t))
+        .map(([id]) => id),
+    );
+
+    const neighborWarnIds = new Set<string>();
+    for (const e of activeFloor.edges) {
+      if (hazardNodeIds.has(e.from)) neighborWarnIds.add(e.to);
+      if (hazardNodeIds.has(e.to)) neighborWarnIds.add(e.from);
+    }
+
+    const drawExclamation = (x: number, y: number, tone: "strong" | "soft") => {
+      ctx.save();
+      const r = 9;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = tone === "strong" ? "#EF4444" : "rgba(239,68,68,0.55)";
+      ctx.strokeStyle = tone === "strong" ? "rgba(239,68,68,0.95)" : "rgba(239,68,68,0.65)";
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "rgba(239,68,68,0.45)";
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 12px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("!", x, y + 0.5);
+      ctx.restore();
+    };
 
     // Draw edges
     for (const edge of activeFloor.edges) {
@@ -160,10 +257,15 @@ export default function RoutingMapViewer() {
         ctx.fillText(marker, node.x, node.y - NODE_RADIUS - 8);
         ctx.restore();
       }
+
+      // Hazard neighbor warning badge (do not override the main emergency marker)
+      if (!emergency && neighborWarnIds.has(node.id)) {
+        drawExclamation(node.x + NODE_RADIUS - 10, node.y - NODE_RADIUS + 10, "soft");
+      }
     }
 
     ctx.restore();
-  }, [activeFloor, emergencyByNodeId, path, pathEdgeDir, pathNodeSet]);
+  }, [activeFloor, emergencyByNodeId, hazardTypes, path, pathEdgeDir, pathNodeSet]);
 
   useEffect(() => {
     const loop = () => {
@@ -183,6 +285,7 @@ export default function RoutingMapViewer() {
       for (const e of entries) {
         canvas.width = e.contentRect.width;
         canvas.height = e.contentRect.height;
+        setCanvasSize({ w: e.contentRect.width, h: e.contentRect.height });
       }
     });
     obs.observe(container);
@@ -269,12 +372,8 @@ export default function RoutingMapViewer() {
         onWheel={(e) => {
           e.preventDefault();
           const dz = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-          const next = Math.max(
-            ZOOM_MIN,
-            Math.min(ZOOM_MAX, parseFloat((zoomRef.current + dz).toFixed(2))),
-          );
-          zoomRef.current = next;
-          setZoomLevel(next);
+          const next = parseFloat((zoomRef.current + dz).toFixed(2));
+          zoomAt(next, e.nativeEvent.offsetX, e.nativeEvent.offsetY);
         }}
       />
 
@@ -282,8 +381,8 @@ export default function RoutingMapViewer() {
       <div
         style={{
           position: "absolute",
-          bottom: 32,
-          right: 24,
+          bottom: 16,
+          right: 16,
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-end",
@@ -393,8 +492,13 @@ export default function RoutingMapViewer() {
               step={ZOOM_STEP}
               value={zoomLevel}
               onChange={(e) => {
-                zoomRef.current = parseFloat(e.target.value);
-                setZoomLevel(zoomRef.current);
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                zoomAt(
+                  parseFloat(e.target.value),
+                  canvas.width / 2,
+                  canvas.height / 2,
+                );
               }}
               style={{
                 width: "120px",
